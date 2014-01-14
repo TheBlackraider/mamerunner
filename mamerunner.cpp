@@ -15,16 +15,58 @@ mamerunner::~mamerunner()
 }
 
 
+/*
+ * En este metodo es llamado por KRunner para realizar la busqueda que quiera hacer el runner en concreto
+ * 
+ * Nosotros miraremos en el fichero xml de la lista de juegos y mostraremos los juegos que vayan coincidiendo
+ * con la entrada del usuario
+ * 
+ */
 void mamerunner::match(Plasma::RunnerContext &context)
 {
 
+    // Comprobamos que la palabra tenga al menos tres digitos. Si no el runner pasara de hacer nada
     const QString term = context.query();
     if (term.length() < 3) {
         return;
     }
-    //TODO
+    
+
+    // Nuestra cadena de activacion es 'mame' seguida <nombre del juego> o toda la lista
+    if (!term.startsWith("mame"))
+    {
+      return;
+    }
+    
+    /*
+     * Realizamos la busqueda en el archivo XML
+     * Por cada coincidencia creamos una instancia de la clase QueryMatch y la almacenamos
+     * en la lista matches, que sera devuelta al final
+     *
+     */ 
+    
+    QList<Plasma::QueryMatch> matches;
+    QStringList params = term.split(" ");
+
+    // Sampler
+    // Caso START
+    if (params[1] == "start")
+    {
+	Plasma::QueryMatch ma(this);
+	
+	ma.setId("start");
+	ma.setText("Start NZBGET");
+	ma.setData("start");
+	ma.setRelevance(1.0);
+	matches.append(ma);
+	m_arguments << "-D";
+    }
+
 }
 
+/*
+ * Este metodo es llamado cuando el usuario hace click en cualquier entrada, en el runner correspondiente
+ */
 void mamerunner::run(const Plasma::RunnerContext &context, const Plasma::QueryMatch &match)
 {
     Q_UNUSED(context)
