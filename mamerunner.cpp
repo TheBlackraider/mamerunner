@@ -48,6 +48,65 @@ void mamerunner::match(Plasma::RunnerContext &context)
     QList<Plasma::QueryMatch> matches;
     QStringList params = term.split(" ");
 
+    configfile->setFileName("~/.mamerunner");
+    
+    if (!configfile->open(QIODevice::ReadOnly || QIODevice::Text))
+      return;
+
+    QString romdir;
+    QString xmlgames;
+
+    while (!configfile->atEnd())
+    {
+	QByteArray linea = configfile->readLine();
+	
+	if (!linea.startsWith('#'))
+	{
+	  QList<QByteArray> token = linea.split("=");
+	   
+	  if (token[0].toUpper() = "ROMDIR")
+	    romdir = token[1];
+
+	  if (token[0].toUpper() = "GAMELIST")
+	    xmlgames = token[1];
+	  
+	  
+	}
+      
+    }
+
+    params.removeFirst();
+    QString queryterm(params.join());
+
+    mameListFile.setFileName(xmlgames);
+    
+    mameListFile.open(QIODevice::ReadOnly);
+
+    QByteArray outArray;
+    QBuffer buffer(&outArray);
+    buffer.open(QIODevice::ReadWrite);
+
+    QString xquery('declare variable $inputDocument external');
+    xquery.append('declare variable $gamename external');
+    xquery.append('doc($inputdocument)/game/name[$gamename]');
+      
+    QXmlQuery query;
+
+    query.bindVariable("inputDocument", &mameListFile);
+    query.bindVariable("gamename", &queryterm);
+    
+    query.setQuery('doc($inputDocument)/name["game=]');
+    
+    if (!query.isValid())
+	return;
+
+    QXmlFormatter formatter(query, &buffer);
+    if (!query.evaluateTo(&formatter))
+	return;
+
+    buffer.close();
+
+    
     // Sampler
     // Caso START
     if (params[1] == "start")

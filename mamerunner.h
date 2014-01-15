@@ -4,11 +4,19 @@
 
 #include <plasma/abstractrunner.h>
 #include <KIcon>
+#include <QFile>
+#include <QXmlStreamReader>
+#include <QString>
 
 // Define our plasma Runner
 class mamerunner : public Plasma::AbstractRunner {
     Q_OBJECT
 
+private:
+  QFile* mameListFile;
+  QFile* configfile;
+
+  
 public:
     // Basic Create/Destroy
     mamerunner( QObject *parent, const QVariantList& args );
